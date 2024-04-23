@@ -1,0 +1,58 @@
+grammar();
+
+use crate::lex::Token;
+use crate::ast::Op;
+
+extern {
+  type Location = usize;
+  type Error = String;
+  
+  enum Token {
+    "<" => Token::Left,
+    ">" => Token::Right,
+    "+" => Token::Plus,
+    "-" => Token::Minus,
+    "." => Token::Input,
+    "," => Token::Output,
+    "[" => Token::LoopStart,
+    "]" => Token::LoopEnd,
+  }
+}
+
+pub Ops: Vec<Op> = {
+  => vec![],
+  <mut prev:Ops> <mut op:Op> => {
+    // Fold arithmatic ops
+    if let Op::Arith(n) = op {
+      if let Some(Op::Arith(m)) = prev.last() {
+        op = Op::Arith(n + m);
+        prev.pop();
+        if op == Op::Arith(0) {
+          return prev;
+        }
+      }
+    }
+    // Fold pointer shifts
+    if let Op::Shift(n) = op {
+      if let Some(Op::Shift(m)) = prev.last() {
+        op = Op::Shift(n + m);
+        prev.pop();
+        if op == Op::Shift(0) {
+          return prev;
+        }
+      }
+    }
+    prev.push(op);
+    prev
+  },
+}
+
+Op: Op = {
+  "<" => Op::Shift(1),
+  ">" => Op::Shift(-1),
+  "." => Op::Input,
+  "," => Op::Output,
+  "+" => Op::Arith(1),
+  "-" => Op::Arith(-1),
+  "[" <loop_body:Ops> "]" => Op::Loop(loop_body),
+}
