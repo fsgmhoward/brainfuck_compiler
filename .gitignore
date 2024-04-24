@@ -1,3 +1,9 @@
 /target
 /.github
 /.devcontainer
+
+core
+*.s
+*.out
+.gdb_history
+*.txt

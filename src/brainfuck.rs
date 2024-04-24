@@ -1,5 +1,5 @@
 // auto-generated: "lalrpop 0.20.2"
-// sha3: 4be72dda327aad6491b8c6ce7afa806bee343035a455607fcff99fded3a8c931
+// sha3: 3ee257cc9773f45f2993428186525942eb51d0cc26565e93266912d1d3c83844
 use crate::lex::Token;
 use crate::ast::Op;
 #[allow(unused_extern_crates)]
@@ -674,7 +674,7 @@ fn __action3<
     (_, __0, _): (usize, Token, usize),
 ) -> Op
 {
-    Op::Shift(1)
+    Op::Shift(-1)
 }
 
 #[allow(clippy::too_many_arguments, clippy::needless_lifetimes, clippy::just_underscores_and_digits)]
@@ -683,7 +683,7 @@ fn __action4<
     (_, __0, _): (usize, Token, usize),
 ) -> Op
 {
-    Op::Shift(-1)
+    Op::Shift(1)
 }
 
 #[allow(clippy::too_many_arguments, clippy::needless_lifetimes, clippy::just_underscores_and_digits)]

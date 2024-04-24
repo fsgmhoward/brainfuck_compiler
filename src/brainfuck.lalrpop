@@ -48,8 +48,8 @@ pub Ops: Vec<Op> = {
 }
 
 Op: Op = {
-  "<" => Op::Shift(1),
-  ">" => Op::Shift(-1),
+  "<" => Op::Shift(-1),
+  ">" => Op::Shift(1),
   "." => Op::Input,
   "," => Op::Output,
   "+" => Op::Arith(1),
