@@ -1,3 +1,5 @@
+use std::io::{BufWriter, Write};
+use std::process::Command;
 use std::{env, fs, process::exit};
 
 use lex::Token;
@@ -39,33 +41,50 @@ fn main() {
   // X86 Codegen
   let asm = codegen(irs);
 
-  println!(".globl main");
-  println!("main:");
+  // Emit
+  let asm_file = format!("{}.s", &args[1]);
+  let f = fs::File::create(&asm_file).unwrap();
+  let mut writer = BufWriter::new(f);
+  writeln!(writer, ".globl main").unwrap();
+  writeln!(writer, "main:").unwrap();
   // Prologue and stack alignment
-  println!("  pushq %rbp");
-  println!("  movq %rsp, %rbp");
-  println!("  andq $-16, %rbp");
+  writeln!(writer, "  pushq %rbp").unwrap();
+  writeln!(writer, "  movq %rsp, %rbp").unwrap();
+  writeln!(writer, "  andq $-16, %rbp").unwrap();
   // Allocate data for number slots
   // calloc(30000, 1);
-  println!("  movq $30000, %rdi");
-  println!("  movq $1, %rsi");
-  println!("  call calloc");
-  println!("  movq %rax, {}", DATA_PTR);
+  writeln!(writer, "  movq $30000, %rdi").unwrap();
+  writeln!(writer, "  movq $1, %rsi").unwrap();
+  writeln!(writer, "  call calloc").unwrap();
+  writeln!(writer, "  movq %rax, {}", DATA_PTR).unwrap();
   // Also save it in %r14
-  println!("  movq %rax, %r14");
+  writeln!(writer, "  movq %rax, %r14").unwrap();
 
   for instr in asm {
     if matches!(instr, crate::x86::Instr::Label(_)) {
-      println!("{}", instr);
+      writeln!(writer, "{}", instr).unwrap();
     } else {
-      println!("  {}", instr);
+      writeln!(writer, "  {}", instr).unwrap();
     }
   }
 
   // Epilogue - leave and return 0
-  println!("  movq %r14, %rdi");
-  println!("  call free");
-  println!("  movq $0, %rax");
-  println!("  leave");
-  println!("  ret");
+  writeln!(writer, "  movq %r14, %rdi").unwrap();
+  writeln!(writer, "  call free").unwrap();
+  writeln!(writer, "  movq $0, %rax").unwrap();
+  writeln!(writer, "  leave").unwrap();
+  writeln!(writer, "  ret").unwrap();
+
+  writer.flush().unwrap();
+
+  // Assemble and link, with cc
+  let bin_file = format!("{}.out", &args[1]);
+  Command::new("cc")
+    .args(vec!["-o", &bin_file, &asm_file])
+    .status()
+    .unwrap();
+
+  // Debug message
+  println!("Output assembly: {}", &asm_file);
+  println!("Output binary: {}", &bin_file);
 }

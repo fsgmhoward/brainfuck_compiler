@@ -1,8 +1,8 @@
 use crate::{ir::Instr as IRInstr, x86::AddType, x86::Instr};
 
-pub fn codegen(ir: Vec<IRInstr>) -> Vec<Instr> {
+pub fn codegen(irs: Vec<IRInstr>) -> Vec<Instr> {
   let mut res = vec![];
-  for instr in ir {
+  for instr in irs {
     match instr {
       IRInstr::Label(s) => res.push(Instr::Label(s)),
       IRInstr::Input => res.append(&mut vec![Instr::Call("getchar".into()), Instr::Mov]),
